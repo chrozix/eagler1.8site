@@ -1,0 +1,72 @@
+
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="description" content="Prebuilt EaglercraftX 1.8.9 offline download." />
+    <meta name="keywords"
+        content="eaglercraft, eaglercraftx, minecraft, 1.8, 1.8.8, eaglercraftx offline, eaglercraftx offline download" />
+    <title>EaglercraftX 1.8 Offline</title>
+    <meta property="og:locale" content="en-US" />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="EaglercraftX 1.8.8 (Offline)" />
+    <meta property="og:description" content="Prebuilt EaglercraftX 1.8.9 offline download." />
+    <link type="image/png" rel="shortcut icon" href="favicon.ico" />
+    <script type="text/javascript" src="largeEPK.js"></script>
+    <script type="text/javascript">
+        async function download() {
+            const download = await new EPKLib.LargeEPK("offline-assets/meta.json", "URL")
+                .fetchMetadata()
+                .then(largeEPK => largeEPK.fetch())
+
+            download.progressCallback.addEventListener("progress", event => {
+                document.getElementById('pageBody').innerText = "Downloading... (" + event.overallPercent.toFixed(2) + "%)";
+                const lineBreak = document.createElement('br');
+                document.getElementById('pageBody').appendChild(lineBreak);
+                const p = document.createElement('p');
+                p.innerText = 'Attempting to create and download your EaglercraftX client. Please wait a while (up to 5 mins on a slow connection), as the download will be over 100MB.';
+                document.getElementById('pageBody').appendChild(p);
+            });
+
+            download.promise.then(res => {
+                document.getElementById('pageBody').innerHTML = null;
+
+                const blob = new Blob([res.getComplete()], { type: 'application/octet-stream' });
+                const offlineDownload = URL.createObjectURL(blob);
+
+                const downloadLink = document.createElement('a');
+                downloadLink.href = offlineDownload;
+                downloadLink.download = res.filename;
+                downloadLink.innerText = 'The download has finished. Click me to download the file.';
+                document.getElementById('pageBody').appendChild(downloadLink);
+                downloadLink.click();
+            });
+        }
+        download()
+            .catch(err => {
+                console.error("[downloader] Failed to download/compile offline download, see below for more information:\n" + (err.stack ? err.stack : err));
+                const lineBreak = document.createElement('br');
+                document.getElementById('pageBody').appendChild(lineBreak);
+
+                const errorMessage = document.createElement('p');
+                errorMessage.innerHTML = `Something went wrong, see below for more information:\n${err.stack ? err.stack : err}`.replace(/\n/gmi, "<br>");
+                document.getElementById('pageBody').appendChild(errorMessage);
+            });
+    </script>
+    <style>
+        body {
+            font-family: Arial, sans-serif
+        }
+    </style>
+</head>
+
+<body>
+    <p id="pageBody">
+        <noscript><br>Please enable JavaScript. JavaScript is required for this page to build your game
+            client.</noscript>
+        Downloading...
+    </p>
+</body>
+
+</html>
